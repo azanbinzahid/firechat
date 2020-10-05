@@ -55,6 +55,7 @@ export default class Chat extends Component {
         content: this.state.content,
         timestamp: Date.now(),
         uid: this.state.user.uid,
+        email: this.state.user.email,
       });
       this.setState({ content: "" });
       chatArea.scrollBy(0, chatArea.scrollHeight);
@@ -97,6 +98,9 @@ export default class Chat extends Component {
               >
                 {chat.content}
                 <br />
+                <span className="chat-email float-right">{chat.email}</span>
+                <br />
+
                 <span className="chat-time float-right">
                   {this.formatTime(chat.timestamp)}
                 </span>
