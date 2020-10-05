@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Header from "../components/Header";
 import { auth } from "../services/firebase";
 import { db } from "../services/firebase";
+import { writeChats } from "../helpers/db";
 
 export default class Chat extends Component {
   constructor(props) {
@@ -50,13 +51,14 @@ export default class Chat extends Component {
     event.preventDefault();
     this.setState({ writeError: null });
     const chatArea = this.myRef.current;
+    const message = {
+      content: this.state.content,
+      timestamp: Date.now(),
+      uid: this.state.user.uid,
+      email: this.state.user.email,
+    };
     try {
-      await db.ref("chats").push({
-        content: this.state.content,
-        timestamp: Date.now(),
-        uid: this.state.user.uid,
-        email: this.state.user.email,
-      });
+      await writeChats(message);
       this.setState({ content: "" });
       chatArea.scrollBy(0, chatArea.scrollHeight);
     } catch (error) {
