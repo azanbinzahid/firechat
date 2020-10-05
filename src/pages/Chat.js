@@ -10,6 +10,7 @@ export default class Chat extends Component {
     this.state = {
       user: auth().currentUser,
       chats: [],
+      users: [],
       content: "",
       readError: null,
       writeError: null,
@@ -35,6 +36,17 @@ export default class Chat extends Component {
         this.setState({ chats });
         chatArea.scrollBy(0, chatArea.scrollHeight);
         this.setState({ loadingChats: false });
+      });
+    } catch (error) {
+      this.setState({ readError: error.message, loadingChats: false });
+    }
+    try {
+      db.ref("users").on("value", (snapshot) => {
+        let users = [];
+        snapshot.forEach((snap) => {
+          users.push(snap.val());
+        });
+        this.setState({ users });
       });
     } catch (error) {
       this.setState({ readError: error.message, loadingChats: false });
@@ -127,6 +139,14 @@ export default class Chat extends Component {
         <div className="py-5 mx-3">
           Login in as:{" "}
           <strong className="text-info">{this.state.user.email}</strong>
+        </div>
+        <div class="container jumbotron">
+          <p>All Users: </p>
+          <ul>
+            {this.state.users.map((user) => {
+              return <li>{user.email}</li>;
+            })}
+          </ul>
         </div>
       </div>
     );
