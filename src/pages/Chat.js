@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Header from "../components/Header";
 import { auth } from "../services/firebase";
 import { db } from "../services/firebase";
+import { writeChats } from "../helpers/db";
 
 export default class Chat extends Component {
   constructor(props) {
@@ -9,6 +10,7 @@ export default class Chat extends Component {
     this.state = {
       user: auth().currentUser,
       chats: [],
+      users: [],
       content: "",
       readError: null,
       writeError: null,
@@ -38,6 +40,17 @@ export default class Chat extends Component {
     } catch (error) {
       this.setState({ readError: error.message, loadingChats: false });
     }
+    try {
+      db.ref("users").on("value", (snapshot) => {
+        let users = [];
+        snapshot.forEach((snap) => {
+          users.push(snap.val());
+        });
+        this.setState({ users });
+      });
+    } catch (error) {
+      this.setState({ readError: error.message, loadingChats: false });
+    }
   }
 
   handleChange(event) {
@@ -50,12 +63,14 @@ export default class Chat extends Component {
     event.preventDefault();
     this.setState({ writeError: null });
     const chatArea = this.myRef.current;
+    const message = {
+      content: this.state.content,
+      timestamp: Date.now(),
+      uid: this.state.user.uid,
+      email: this.state.user.email,
+    };
     try {
-      await db.ref("chats").push({
-        content: this.state.content,
-        timestamp: Date.now(),
-        uid: this.state.user.uid,
-      });
+      await writeChats(message);
       this.setState({ content: "" });
       chatArea.scrollBy(0, chatArea.scrollHeight);
     } catch (error) {
@@ -97,6 +112,9 @@ export default class Chat extends Component {
               >
                 {chat.content}
                 <br />
+                <span className="chat-email float-right">{chat.email}</span>
+                <br />
+
                 <span className="chat-time float-right">
                   {this.formatTime(chat.timestamp)}
                 </span>
@@ -121,6 +139,14 @@ export default class Chat extends Component {
         <div className="py-5 mx-3">
           Login in as:{" "}
           <strong className="text-info">{this.state.user.email}</strong>
+        </div>
+        <div class="container jumbotron">
+          <p>All Users: </p>
+          <ul>
+            {this.state.users.map((user) => {
+              return <li>{user.email}</li>;
+            })}
+          </ul>
         </div>
       </div>
     );

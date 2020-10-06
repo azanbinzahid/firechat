@@ -15,5 +15,12 @@ export function writeChats(message) {
     content: message.content,
     timestamp: message.timestamp,
     uid: message.uid,
+    email: message.email,
+  });
+}
+
+export function addUser(user) {
+  return db.ref("users").child(user.uid).set({
+    email: user.email,
   });
 }

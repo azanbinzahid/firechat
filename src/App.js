@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import { auth } from "./services/firebase";
 import "bootstrap/dist/css/bootstrap.css";
 import "./styles.css";
+import { addUser } from "./helpers/db";
 
 function PrivateRoute({ component: Component, authenticated, ...rest }) {
   return (
@@ -57,6 +58,7 @@ class App extends Component {
   componentDidMount() {
     auth().onAuthStateChanged((user) => {
       if (user) {
+        addUser(user);
         this.setState({
           authenticated: true,
           loading: false,
